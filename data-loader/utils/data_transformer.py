@@ -8,14 +8,30 @@ class DataTransformer:
     def assign_non_nulls_titles(self, dataFrame, columnName, akas_data_source):
         akas_df = akas_data_source.read()
         filtered_df = akas_df.dropna(subset=['title'])
-        null_title_df = dataFrame[dataFrame[columnName].isnull()]['tconst']
-        filtered_df = pd.merge(null_title_df, filtered_df, how='left', left_on='tconst', right_on='titleId')
+
+        # Get the tconst values for null titles
+        null_title_tconsts = dataFrame[dataFrame[columnName].isnull()]['tconst']
+        # Use isin to filter the rows in filtered_df with the null_title_tconsts
+        filtered_df = filtered_df[filtered_df['titleId'].isin(null_title_tconsts)]
+
         filtered_df['isOriginalTitle'] = pd.to_numeric(filtered_df['isOriginalTitle'], errors='coerce').fillna(0)
         sorted_df = filtered_df.sort_values(by='isOriginalTitle', ascending=False)
         final_titles_df = sorted_df.drop_duplicates(subset='titleId', keep='first')[['titleId', 'title']]
+
+        # Merge with dataFrame based on tconst
         merged_df = pd.merge(dataFrame, final_titles_df, how='left', left_on='tconst', right_on='titleId')
-        merged_df[columnName] = merged_df[columnName].fillna(merged_df['title'])
-        return merged_df
+
+        # Use np.where to fill null values in columnName with 'title'
+        merged_df[columnName] = np.where(merged_df[columnName].isnull(), merged_df['title'], merged_df[columnName])
+
+        # Get the tconst values for still null titles after the merge
+        still_null_title_tconsts = len(merged_df[merged_df[columnName].isnull()][columnName])
+
+        # Print the number of filled rows
+        print(f'Filled {len(null_title_tconsts) - still_null_title_tconsts} rows from {len(null_title_tconsts)}')
+
+        return merged_df.dropna(subset=[columnName])
+
 
     def get_basics_data(self, basics_df, akas_data_source):
         basics_df = basics_df[basics_df['titleType'] == 'movie']
