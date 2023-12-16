@@ -28,4 +28,4 @@ COPY . /app
 # Run unit tests
 RUN python -m unittest discover tests
 
-ENTRYPOINT ["dockerize", "-wait", "tcp://postgres:5432", "-timeout", "20s", "python", "-u", "load_data.py"]
+ENTRYPOINT ["dockerize", "-wait", "tcp://postgres:5432", "-timeout", "20s", "python", "-u", "data_loader.py"]

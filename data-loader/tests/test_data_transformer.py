@@ -1,7 +1,8 @@
 import unittest
 import pandas as pd
 from unittest.mock import MagicMock
-from load_data import DataTransformer, DataSource
+from utils.data_transformer import DataTransformer
+from utils.data_source import DataSource
 
 
 class TestDataTransformer(unittest.TestCase):
@@ -50,7 +51,7 @@ class TestDataTransformer(unittest.TestCase):
 
         # Add your assertions based on the expected behavior of get_basics_data
         # For example:
-        self.assertEqual(result_df['runtimeMinutesNumeric'].tolist(), ['120', None])
+        self.assertEqual(result_df['runtimeMinutesNumeric'].tolist(), [120, None])
 
     def test_get_movies_data(self):
         transformer = DataTransformer()
@@ -58,7 +59,7 @@ class TestDataTransformer(unittest.TestCase):
 
         # Add your assertions based on the expected behavior of get_movies_data
         # For example:
-        self.assertEqual(movies_data['rating'].tolist(), ['8.0', None])
+        self.assertEqual(movies_data['rating'].tolist(), [8.0, None])
 
     def test_get_genres_data(self):
         transformer = DataTransformer()

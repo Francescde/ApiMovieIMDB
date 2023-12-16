@@ -16,7 +16,7 @@ def download_and_extract(url):
     return content
 
 # Database connection parameters
-# Update this line in load_data.py
+# Update this line in data_loader.py
 db_params = {
     "host": "postgres",
     "port": 5432,
