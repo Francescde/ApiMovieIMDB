@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: your_user
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: your_database
+    volumes:
+      - ./sql-scripts:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+      
+  data-loader:
+    build:
+      context: ./data-loader
+    depends_on:
+      - postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: your_user
+      DB_PASSWORD: your_password
+      DB_NAME: your_database
+
+  api:
+    build:
+      context: ./api
+    depends_on:
+      - postgres
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: your_user
+      DB_PASSWORD: your_password
+      DB_NAME: your_database
+volumes:
+  postgres_data:
