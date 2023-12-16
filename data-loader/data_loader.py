@@ -19,16 +19,16 @@ class DataLoader:
             self.data_inserter.rollback()
             print(f"Error: {e}")
 
-    def insert_movies_data_and_get_movie_genres_data(self, basics_ds, ratings_ds, akas_ds):
-        movies_data, basics_df = self.data_transformer.get_movies_data(basics_ds, ratings_ds, akas_ds)
-        self.data_inserter.execute_insert(movies_data, "movies")
-        return basics_df
-
     def insert_movies_and_genres_rows_and_retrieve_relation(self, basics_ds, ratings_ds, akas_ds):
         movie_genres_df = self.insert_movies_data_and_get_movie_genres_data(basics_ds, ratings_ds, akas_ds)
         genres_data, genres_movie_data = self.data_transformer.get_genres_data(movie_genres_df)
         self.data_inserter.execute_insert(genres_data, "genres")
         return genres_movie_data
+
+    def insert_movies_data_and_get_movie_genres_data(self, basics_ds, ratings_ds, akas_ds):
+        movies_data, basics_df = self.data_transformer.get_movies_data(basics_ds, ratings_ds, akas_ds)
+        self.data_inserter.execute_insert(movies_data, "movies")
+        return basics_df
 
     def truncate_tables(self, table_names):
         for table in table_names:
