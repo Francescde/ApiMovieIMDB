@@ -1,2 +1,7 @@
 data-loader/.idea/
 *.tsv
+api/.idea/
+api/__pycache__/
+api/models/__pycache__/
+api/resources/__pycache__/
+api/tests/__pycache__/

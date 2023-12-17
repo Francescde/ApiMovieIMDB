@@ -1,0 +1,11 @@
+Flask
+psycopg2-binary
+marshmallow-sqlalchemy
+flask_swagger_ui
+flask_sqlalchemy
+flask_marshmallow
+flask_restful
+pytest-docker
+sqlalchemy_utils
+pytest
+flask_testing
