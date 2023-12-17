@@ -11,22 +11,10 @@ services:
       - ./sql-scripts:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
-      
-  data-loader:
-    build:
-      context: ./data-loader
-    depends_on:
-      - postgres
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: your_user
-      DB_PASSWORD: your_password
-      DB_NAME: your_database
 
-  api:
+  solution:
     build:
-      context: ./api
+      context: ./solution
     depends_on:
       - postgres
     ports:
@@ -36,4 +24,5 @@ services:
       DB_PORT: 5432
       DB_USER: your_user
       DB_PASSWORD: your_password
-      DB_NAME: your_database
+      DB_NAME: your_database # Add this environment variable to specify the host of the data-loader service
+

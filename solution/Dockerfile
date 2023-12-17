@@ -1,3 +1,4 @@
+# Builder stage
 FROM python:3.8 as builder
 
 WORKDIR /app
@@ -5,7 +6,7 @@ WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Download and extract dockerize in a different stage
+# Downloader stage
 FROM alpine:latest as downloader
 
 WORKDIR /app
@@ -20,12 +21,27 @@ FROM python:3.8
 
 WORKDIR /app
 
+# Copy dependencies from the builder stage
 COPY --from=builder /usr/local /usr/local
+
+# Copy dockerize from the downloader stage
 COPY --from=downloader /usr/local/bin/dockerize /usr/local/bin/dockerize
 
+# Copy the rest of the application
 COPY . /app
 
+# Set the working directory for the API tests
+WORKDIR /app/api
 # Run unit tests
 RUN python -m unittest discover tests
 
-ENTRYPOINT ["dockerize", "-wait", "tcp://postgres:5432", "-timeout", "20s", "python", "-u", "app.py"]
+# Set the working directory for the data-loader tests
+WORKDIR /app/data-loader
+# Run unit tests
+RUN python -m unittest discover tests
+
+# Reset the working directory to the root
+WORKDIR /app
+
+# Entrypoint for the application
+ENTRYPOINT ["dockerize", "-wait", "tcp://postgres:5432", "-timeout", "20s", "./run.sh"]

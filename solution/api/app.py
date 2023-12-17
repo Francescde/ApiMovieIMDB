@@ -2,9 +2,8 @@ from flask import Flask
 from flask_restful import Api
 from flask_swagger_ui import get_swaggerui_blueprint
 from models.main import db
-
+import json
 import logging
-
 from resources.doc import DocResource
 from resources.genre import GenreResource
 from resources.movie import MovieResource
@@ -50,13 +49,17 @@ class MovieAPI:
 
 
 if __name__ == '__main__':
-    db_params = {
-        "host": "localhost",
-        "port": 5432,
-        "user": "your_user",
-        "password": "your_password",
-        "database": "your_database",
-    }
-    connectionString = 'postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}'.format(**db_params)
-    movie_api = MovieAPI(connectionString)
-    movie_api.run()
+    with open('config.json') as config_file:
+        config_data = json.load(config_file)
+
+        # Use the config data to construct the db_params dictionary
+        db_params = {
+            "host": config_data["DB_HOST"],
+            "port": int(config_data["DB_PORT"]),
+            "user": config_data["DB_USER"],
+            "password": config_data["DB_PASSWORD"],
+            "database": config_data["DB_NAME"],
+        }
+        connectionString = 'postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}'.format(**db_params)
+        movie_api = MovieAPI(connectionString)
+        movie_api.run()

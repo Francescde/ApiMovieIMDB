@@ -1,6 +1,7 @@
 .git
 .vscode
 __pycache__
-tests/__pycache__
+**/__pycache__
 *.pyc
 .idea
+**/.idea
