@@ -12,8 +12,8 @@ class DataTransformer:
         movies_data["ratingNumeric"] = pd.to_numeric(movies_data["averageRating"], errors='coerce')
         movies_data["ratingNumeric"] = movies_data["ratingNumeric"].replace({np.nan: None})
         movies_data = movies_data[
-            ["movie_id", "primaryTitle", "startYearNumeric", "runtimeMinutesNumeric", "ratingNumeric", "imdb_link"]]
-        movies_data.columns = ["id", "title", "year", "runtime", "rating", "imdb_link"]
+            ["movie_id", "primaryTitle", "startYearNumeric", "runtimeMinutesNumeric", "ratingNumeric", "tconst"]]
+        movies_data.columns = ["id", "title", "year", "runtime", "rating", "imdb_id"]
         return movies_data, basics_df
 
     def get_genres_data(self, filtered_basics_df):
@@ -37,8 +37,7 @@ class DataTransformer:
     def get_basics_data(self, basics_df, akas_data_source):
         basics_df = basics_df[basics_df['titleType'] == 'movie']
         basics_df = basics_df.drop_duplicates(subset='tconst')
-        basics_df.loc[:, "imdb_link"] = basics_df["tconst"].apply(
-            lambda movie_id: f"https://www.imdb.com/title/{movie_id}/")
+        #basics_df.loc[:, "imdb_link"] = basics_df["tconst"].apply(lambda movie_id: f"https://www.imdb.com/title/{movie_id}/")
         basics_df.loc[:, "movie_id"] = basics_df["tconst"].apply(lambda x: str(uuid.uuid5(uuid.NAMESPACE_URL, x)))
         basics_df.loc[:, "runtimeMinutesNumeric"] = pd.to_numeric(basics_df["runtimeMinutes"], errors='coerce')
         basics_df["runtimeMinutesNumeric"] = basics_df["runtimeMinutesNumeric"].replace({np.nan: None})

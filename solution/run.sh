@@ -5,10 +5,13 @@ config_json="{\"DB_HOST\": \"$DB_HOST\", \"DB_PORT\": \"$DB_PORT\", \"DB_USER\":
 echo "$config_json"
 
 echo "$config_json" > config.json
+# wait a little longer beacause sometimes is building the database
+sleep 5
 
 # Run data-loader.py
 if [ "$SKIP_LOAD_DATA" != "true" ]; then
     python data-loader/data_loader.py
+    #python data-loader/profiler_data_loader.py
 fi
 
 if [ "$DEVELOP_SERVER" = "true" ]; then

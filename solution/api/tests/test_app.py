@@ -33,7 +33,7 @@ class TestMovieAPI(TestCase):
             'year': 2022,
             'rating': 8.0,
             'runtime': 120,
-            'imdb_link': 'https://www.imdb.com/test_movie'
+            'imdb_link': 'https://www.imdb.com/title/test_movie/'
         })
         self.assertEqual(response.status_code, 201)
 
@@ -45,7 +45,7 @@ class TestMovieAPI(TestCase):
             self.assertEqual(movie.year, 2022)
             self.assertEqual(movie.rating, 8.0)
             self.assertEqual(movie.runtime, 120)
-            self.assertEqual(movie.imdb_link, 'https://www.imdb.com/test_movie')
+            self.assertEqual(movie.imdb_id, 'test_movie')
 
     def test_genre_list(self):
         # Test listing genres via the API
@@ -78,6 +78,23 @@ class TestMovieAPI(TestCase):
             self.assertEqual(len(data), 2)
             self.assertEqual(data[0]['title'], 'Movie 1')
             self.assertEqual(data[1]['title'], 'Movie 2')
+
+    def test_get_all_movies_desc(self):
+        # Test retrieving all movies via the API
+        with self.app.app_context():
+            movie1 = Movie(title='Movie 1', year=2020, rating=7.5, runtime=110)
+            movie2 = Movie(title='Movie 2', year=2021, rating=8.0, runtime=120)
+            db.session.add_all([movie1, movie2])
+            db.session.commit()
+
+            response = self.client.get('/movies?desc')
+            self.assertEqual(response.status_code, 200)
+
+            # Check if the response contains the added movies
+            data = response.json
+            self.assertEqual(len(data), 2)
+            self.assertEqual(data[0]['title'], 'Movie 2')
+            self.assertEqual(data[1]['title'], 'Movie 1')
 
     def test_get_single_movie(self):
         # Test retrieving a single movie by its ID via the API

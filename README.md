@@ -59,8 +59,7 @@ Download relevant data files from [IMDb Datasets](https://datasets.imdbws.com/).
    Keyset pagination has been implemented for listing movies within the API. This choice was made due to the dataset's size, where offset pagination could be inefficient. Additionally, as the dataset lacks a clear distribution of values, and some ranges could be extensive, seek pagination was deemed less suitable for this particular use case. The implementation ensures efficient handling of large datasets while providing stable and predictable performance.
    ```python
    # Apply sorting as there are fields with no unique values; add a second field to ensure being deterministic
-   descendent = 'desc' in query_params
-   if not descendent or not int(descendent) == 1:
+   if not 'desc' in query_params:
        if after_id:
            subquery = Movie.query.filter(Movie.id == after_id).subquery()
            query = query.filter(sqlalchemy.or_(
@@ -135,6 +134,8 @@ This project uses Docker with two services, `postgres` and `solution`.
   - DB_USER: your_user
   - DB_PASSWORD: your_password
   - DB_NAME: your_database
+  - DEVELOP_SERVER: false/true
+  - SKIP_LOAD_DATA: false/true
 
 ## Solution Service
 
@@ -165,19 +166,7 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
 
 # Todo
 
-1. **Remove Magic Values:**
-   Some values are hardcoded, such as the name of the columns in the data files and the port for the API. It's a good practice to make them configurable to facilitate easy replacement without modifying the code.
-
-   - **Data Files Column Names:**
-     The column names in the data files, which are currently hardcoded, should be made configurable. This ensures flexibility and ease of adaptation to different datasets without modifying the codebase.
-
-   - **API Port Configuration:**
-     The API port, currently hardcoded as 5000, should be made configurable. This allows for easy port customization without requiring changes to the source code.
-
-   For example, consider using environment variables or a configuration file to store and retrieve these values dynamically.
-
-
-2. **Improve Logging:**
+1. **Improve Logging:**
    During the development process, logging was not initially prioritized. However, incorporating a robust logging system is crucial for understanding the application's behavior and diagnosing issues effectively. Logging into different levels allows for a more granular control over the information captured, providing insights into various aspects of the application.
 
    **Why Logging Matters:**
@@ -209,11 +198,39 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
 
    Introducing proper logging levels in your application enhances its maintainability, facilitates debugging, and contributes to a more efficient development and troubleshooting process.
 
+2. **Remove Magic Values:**
+   Some values are hardcoded, such as the name of the columns in the data files and the port for the API. It's a good practice to make them configurable to facilitate easy replacement without modifying the code.
 
-3. **Optimize Storage for IMDb Link:**
-   Consider storing IMDb IDs instead of full IMDb links to conserve database space. Storing IMDb links can be resource-intensive, and generating the link dynamically within the API when fetching the resource could be a more space-efficient approach. IMDb IDs can be extracted from the URL provided during the movie post request.
+   - **Data Files Column Names:**
+     The column names in the data files, which are currently hardcoded, should be made configurable. This ensures flexibility and ease of adaptation to different datasets without modifying the codebase.
 
-4. **Reschedule Data Loading:**
+   - **API Port Configuration:**
+     The API port, currently hardcoded as 5000, should be made configurable. This allows for easy port customization without requiring changes to the source code.
+
+   For example, consider using environment variables or a configuration file to store and retrieve these values dynamically.
+
+
+3. **Optimizing Data Insertion:**
+   Efficient data insertion remains the critical area for improvement in the data-loader process. While initial attempts have been made to experiment with indexing and parallel insertion using multithreading, there is still room for enhancement.
+
+- acumulated time:
+   data_inserter.py:15(execute_insert) = 482.744
+   data_loader.py:12(etl_movies_genres) = 705.030
+   data_source.py:23(read) = 157.840
+4. **Enhancing Data Loading Efficiency:**
+   To address the second most time-consuming aspect of reading data from files, we should consider implementing the following optimizations within the `DataSource` class:
+
+- **Optimize CSV Reading with `pandas.read_csv` Parameters:**
+   When reading CSV files, leverage the power of `pandas.read_csv` parameters to fine-tune the reading process. Set the `dtype` for columns to specify data types, use `usecols` to read only the necessary columns, and utilize `parse_dates` for columns containing datetime information.
+
+- **Implement `chunksize` for Large Datasets:**
+   Implementing the use of `chunksize` can significantly improve the reading process, particularly when dealing with large datasets. This allows the data to be read in manageable chunks, preventing memory overflow and improving overall performance.
+
+- **Utilize Dask for Parallel Reading:**
+   Explore the capabilities of Dask to introduce parallelization into the reading process. Dask is well-suited for handling larger-than-memory computations and can distribute the load across multiple cores, leading to faster data loading times.
+
+
+5. **Reschedule Data Loading:**
    According to the IMDb [Description](https://developer.imdb.com/non-commercial-datasets/), data is updated every day. As the data-loader is built in a way that each execution replaces the old data with the new one, scheduling a reload could be really useful.
 
    For example, to schedule a task to reload your Docker container every day at 2 am, you can use cron jobs. Here's how you can modify your Docker Compose file to include a cron service that triggers the reload:
@@ -285,7 +302,7 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
 
    With these changes, the `solution` container would be restarted daily at 2 am. The data-loader should also have a way to alert if an execution fails because then the data would be from the previous load thanks to the rollback policy.
 
-5. **Enhance API Integration Tests:**
+6. **Enhance API Integration Tests:**
    Improve API integration tests by leveraging `pytest-docker` to instantiate a Dockerized PostgreSQL database. Testing on an environment that mirrors the actual API setup provides more accurate and realistic results compared to the current in-memory SQLLittle setup.
 
 # Curiosity

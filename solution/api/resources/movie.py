@@ -3,6 +3,7 @@ from flask import request
 from flask_restful import Resource
 from sqlalchemy import desc
 from sqlalchemy.orm import joinedload
+import re
 
 from models.main import MovieSchema, Movie, Genre, db
 
@@ -45,8 +46,7 @@ class MovieResource(Resource):
         # Apply sorting as there are fields with no unique values add a second field to ensure being deterministic
         # Implement keyset pagination
         # Use a subquery to get the value of the sorting field for the specified after_id
-        descendent = query_params.get('desc')
-        if not descendent or not int(descendent) == 1:
+        if 'desc' not in query_params.keys():
             if after_id:
                 subquery = Movie.query.filter(Movie.id == after_id).subquery()
                 query = query.filter(sqlalchemy.or_(
@@ -77,8 +77,8 @@ class MovieResource(Resource):
         serialized_movies = movies_schema.dump(movies)
         # genres aren't serializing as they should. this is a workaround
         for serialized_movie, movie in zip(serialized_movies, movies):
-            serialized_movie['genres'] = [{'name': genre.name} for genre in movie.genres]
-
+            custom_serialize(movie, serialized_movie)
+        
         return serialized_movies
 
     def post(self):
@@ -88,7 +88,20 @@ class MovieResource(Resource):
 
         # Extract genres from the request data
         genres_data = data.pop('genres', [])
-        print(data)
+        if 'imdb_link' in data.keys():
+            # Assuming the URL is in the format "https://www.imdb.com/title/<imdb_id>/"
+            imdb_url = data['imdb_link']
+
+            # Extract IMDb ID using regular expression
+            match = re.search(r'https://www.imdb.com/title/(\w+)(?:/)?', imdb_url)
+            if match:
+                imdb_id = match.group(1)
+                data['imdb_id'] = imdb_id
+                data.pop('imdb_link')
+            else:
+                # Handle the case where the URL doesn't match the expected format
+                # You can raise an exception, log an error, or handle it as needed
+                return {'message': 'Invalid IMDb URL format'}, 400
 
         # Create a new movie without genres
         new_movie = Movie(**data)
@@ -105,6 +118,32 @@ class MovieResource(Resource):
             new_movie.genres.append(genre)
         db.session.commit()
         serialized_movie = movies_schema.dump(new_movie)
-        serialized_movie['genres'] = genres_data
+        custom_serialize(new_movie, serialized_movie)
 
         return serialized_movie, 201
+
+
+class MovieSingleResource(Resource):
+    def get(self, movie_id):
+        movie_schema = MovieSchema(many=False)
+        '''Get a single movie by its ID'''
+        movie = Movie.query.options(joinedload(Movie.genres)).get(movie_id)
+
+        if not movie:
+            return {'message': 'Movie not found'}, 404
+
+        # Manually construct the serialized output with genres
+        serialized_movie = movie_schema.dump(movie)
+        custom_serialize(movie, serialized_movie)
+
+        return serialized_movie
+
+def serialize_imbd_reference(serialized_movie):
+    if 'imdb_id' in serialized_movie.keys():
+        if serialized_movie['imdb_id'] is not None:
+            serialized_movie['imdb_link'] = f"https://www.imdb.com/title/{serialized_movie['imdb_id']}/"
+        serialized_movie.pop('imdb_id')
+
+def custom_serialize(movie, serialized_movie):
+    serialized_movie['genres'] = [{'name': genre.name} for genre in movie.genres]
+    serialize_imbd_reference(serialized_movie)

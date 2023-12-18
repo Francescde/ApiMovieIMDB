@@ -72,8 +72,7 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
         # Apply sorting as there are fields with no unique values add a second field to ensure being deterministic
         # Implement keyset pagination
         # Use a subquery to get the value of the sorting field for the specified after_id
-        descendent = query_params.get('desc')
-        if not descendent or not int(descendent) == 1:
+        if 'desc' not in query_params.keys():
             if after_id:
                 subquery = Movie.query.filter(Movie.id == after_id).subquery()
                 query = query.filter(sqlalchemy.or_(
@@ -104,10 +103,8 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
         serialized_movies = movies_schema.dump(movies)
         # genres aren't serializing as they should. this is a workaround
         for serialized_movie, movie in zip(serialized_movies, movies):
-            serialized_movie['genres'] = [{'name': genre.name} for genre in movie.genres]
-
+            custom_serialize(movie, serialized_movie)
         return serialized_movies
-
 ```
 
 
@@ -141,6 +138,7 @@ Content-Type: application/json
 #### Code:
 
 ```python
+    
     def post(self):
         movies_schema = MovieSchema(many=False)
         '''Create a new movie'''
@@ -148,14 +146,25 @@ Content-Type: application/json
 
         # Extract genres from the request data
         genres_data = data.pop('genres', [])
-        print(data)
+        if 'imdb_link' in data.keys():
+            # Assuming the URL is in the format "https://www.imdb.com/title/<imdb_id>/"
+            imdb_url = data['imdb_link']
+
+            # Extract IMDb ID using regular expression
+            match = re.search(r'https://www.imdb.com/title/(\w+)(?:/)?', imdb_url)
+            if match:
+                imdb_id = match.group(1)
+                data['imdb_id'] = imdb_id
+                data.pop('imdb_link')
+            else:
+                # Handle the case where the URL doesn't match the expected format
+                # You can raise an exception, log an error, or handle it as needed
+                return {'message': 'Invalid IMDb URL format'}, 400
 
         # Create a new movie without genres
         new_movie = Movie(**data)
 
         db.session.add(new_movie)
-        # Serialize the movie with genres
-        db.session.commit()
 
         # Add genres to the new movie
         for genre_data in genres_data:
@@ -164,13 +173,13 @@ Content-Type: application/json
             if not genre:
                 genre = Genre(name=genre_data['name'])
                 db.session.add(genre)
-                db.session.commit()
             new_movie.genres.append(genre)
-            db.session.commit()
+        db.session.commit()
         serialized_movie = movies_schema.dump(new_movie)
-        serialized_movie['genres'] = genres_data
+        custom_serialize(new_movie, serialized_movie)
 
         return serialized_movie, 201
+
 
 ```
 ### 3. **GET /movies/{id}**
@@ -204,11 +213,9 @@ GET /movies/123456789
 
         # Manually construct the serialized output with genres
         serialized_movie = movie_schema.dump(movie)
-        serialized_movie['genres'] = [{'name': genre.name} for genre in movie.genres]
+        custom_serialize(movie, serialized_movie)
 
         return serialized_movie
-
-
 ```
 
 ## Prerequisites

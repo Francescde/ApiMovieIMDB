@@ -33,17 +33,17 @@ class Genre(db.Model):
     __tablename__ = "genres"
     #id = db.Column(db.String(36), default=db.text("uuid_generate_v4()"), primary_key=True) #exclusive to postgress
     id = db.Column(db.String(36), default=generate_uuid_genre, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
     movies = db.relationship("Movie", secondary=movie_genre_association, back_populates='genres')
 
 class Movie(db.Model):
     __tablename__ = "movies"
     id = db.Column(db.String(36), default=generate_uuid_movie, primary_key=True)
-    title = db.Column(db.String(500), nullable=False)
+    title = db.Column(db.String(300), nullable=False)
     year = db.Column(db.Integer)
     rating = db.Column(db.Float)
     runtime = db.Column(db.Integer)
-    imdb_link = db.Column(db.String(255))
+    imdb_id = db.Column(db.String(15))
     genres = db.relationship("Genre", secondary=movie_genre_association, back_populates='movies')
 
 

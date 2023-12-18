@@ -6,8 +6,7 @@ import json
 import logging
 from resources.doc import DocResource
 from resources.genre import GenreResource
-from resources.movie import MovieResource
-from resources.movie_single import MovieSingleResource
+from resources.movie import MovieResource, MovieSingleResource
 
 
 class MovieAPI:
