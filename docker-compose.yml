@@ -20,7 +20,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      DEVELOP_SERVER: true
+      DEVELOP_SERVER: false
       SKIP_LOAD_DATA: false
       DB_HOST: postgres
       DB_PORT: 5432
