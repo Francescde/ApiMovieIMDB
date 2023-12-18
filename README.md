@@ -209,8 +209,9 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
 
 - **acumulated time**:
 - data_inserter.py:15(execute_insert) = 482.744
-- data_loader.py:12(etl_movies_genres) = 705.030
 - data_source.py:23(read) = 157.840
+
+- **data_loader.py:12(etl_movies_genres)** = 705.030 (main function)
 
 4. **Enhancing Data Loading Efficiency:**
    To address the second most time-consuming aspect of reading data from files, we should consider implementing the following optimizations within the `DataSource` class:
