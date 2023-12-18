@@ -1,11 +1,6 @@
 # Builder stage
 FROM python:3.8 as builder
 
-WORKDIR /app
-
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Downloader stage
 FROM alpine:latest as downloader
 
@@ -30,13 +25,18 @@ COPY --from=downloader /usr/local/bin/dockerize /usr/local/bin/dockerize
 # Copy the rest of the application
 COPY . /app
 
+
 # Set the working directory for the API tests
 WORKDIR /app/api
+RUN pip install --no-cache-dir -r requirements.txt
 # Run unit tests
 RUN python -m unittest discover tests
 
 # Set the working directory for the data-loader tests
 WORKDIR /app/data-loader
+RUN pip install --no-cache-dir -r requirements.txt
+#To run api on a WSGI server
+RUN pip install gunicorn
 # Run unit tests
 RUN python -m unittest discover tests
 

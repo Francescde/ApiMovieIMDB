@@ -44,8 +44,13 @@ class DataTransformer:
         basics_df["runtimeMinutesNumeric"] = basics_df["runtimeMinutesNumeric"].replace({np.nan: None})
         basics_df.loc[:, "startYearNumeric"] = pd.to_numeric(basics_df["startYear"], errors='coerce')
         basics_df["startYear"] = basics_df["startYear"].replace({np.nan: None})
-        basics_df = self.assign_non_nulls_titles(basics_df, "primaryTitle", akas_data_source)
+        if akas_data_source:
+            basics_df = self.assign_non_nulls_titles(basics_df, "primaryTitle", akas_data_source)
+        all_basics = len(basics_df['primaryTitle'])
         basics_df = basics_df.dropna(subset=['primaryTitle'])
+        new_all_basics = len(basics_df['primaryTitle'])
+        # Print the number of filled rows
+        print(f'Droped {all_basics - new_all_basics} rows from {all_basics}')
         return basics_df
 
     def assign_non_nulls_titles(self, dataFrame, columnName, akas_data_source):

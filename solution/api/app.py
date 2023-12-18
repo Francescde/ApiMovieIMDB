@@ -9,22 +9,22 @@ from resources.genre import GenreResource
 from resources.movie import MovieResource
 from resources.movie_single import MovieSingleResource
 
-logging.basicConfig()
-logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
-SWAGGER_URL = '/docs'  # URL for exposing Swagger UI (without trailing '/')
-API_URL = '/docs/openapi.yaml'  # URL to your OpenAPI YAML content
-
-# Call factory function to create our blueprint
-swaggerui_blueprint = get_swaggerui_blueprint(
-    SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
-    API_URL,
-    config={  # Swagger UI config overrides
-        'app_name': "Movie API"
-    },
-)
 
 class MovieAPI:
     def __init__(self, connectionString):
+        logging.basicConfig()
+        logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
+        SWAGGER_URL = '/docs'  # URL for exposing Swagger UI (without trailing '/')
+        API_URL = '/docs/openapi.yaml'  # URL to your OpenAPI YAML content
+
+        # Call factory function to create our blueprint
+        swaggerui_blueprint = get_swaggerui_blueprint(
+            SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
+            API_URL,
+            config={  # Swagger UI config overrides
+                'app_name': "Movie API"
+            },
+        )
         self.app = Flask(__name__)
         self.api = Api(self.app)
         self.app.register_blueprint(swaggerui_blueprint)
@@ -43,9 +43,9 @@ class MovieAPI:
         self.api.add_resource(MovieSingleResource, '/movies/<string:movie_id>')
         self.api.add_resource(DocResource, '/docs/openapi.yaml')
 
-    def run(self):
-        if __name__ == '__main__':
-            self.app.run(debug=True, host='0.0.0.0', port=5000)
+    def start(self):
+        self.app.run(debug=True, host='0.0.0.0', port=5000)
+        return self.app
 
 
 if __name__ == '__main__':
@@ -62,4 +62,4 @@ if __name__ == '__main__':
         }
         connectionString = 'postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}'.format(**db_params)
         movie_api = MovieAPI(connectionString)
-        movie_api.run()
+        movie_api.start()

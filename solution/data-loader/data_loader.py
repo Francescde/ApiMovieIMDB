@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
         basics_ds = DataSource("https://datasets.imdbws.com/title.basics.tsv.gz", True)
         ratings_ds = DataSource("https://datasets.imdbws.com/title.ratings.tsv.gz", True)
-        akas_ds = DataSource("https://datasets.imdbws.com/title.akas.tsv.gz", True)
+        akas_ds = None #DataSource("https://datasets.imdbws.com/title.akas.tsv.gz", True)
 
         data_loader = DataLoader(db_params)
         data_loader.etl_movies_genres(basics_ds, ratings_ds, akas_ds)
