@@ -199,24 +199,19 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
    Introducing proper logging levels in your application enhances its maintainability, facilitates debugging, and contributes to a more efficient development and troubleshooting process.
 
 2. **Remove Magic Values:**
-   Some values are hardcoded, such as the name of the columns in the data files and the port for the API. It's a good practice to make them configurable to facilitate easy replacement without modifying the code.
+   Some values are hardcoded, such as the name of the columns in the data files and the host and port for the API. It's a good practice to make them configurable to facilitate easy replacement without modifying the code.
 
-   - **Data Files Column Names:**
-     The column names in the data files, which are currently hardcoded, should be made configurable. This ensures flexibility and ease of adaptation to different datasets without modifying the codebase.
-
-   - **API Port Configuration:**
-     The API port, currently hardcoded as 5000, should be made configurable. This allows for easy port customization without requiring changes to the source code.
-
-   For example, consider using environment variables or a configuration file to store and retrieve these values dynamically.
+   For example, consider using environment variables or a configuration file to store and retrieve these values dynamically, just as it is done with the database configuration.
 
 
 3. **Optimizing Data Insertion:**
    Efficient data insertion remains the critical area for improvement in the data-loader process. While initial attempts have been made to experiment with indexing and parallel insertion using multithreading, there is still room for enhancement.
 
-- acumulated time:
-   data_inserter.py:15(execute_insert) = 482.744
-   data_loader.py:12(etl_movies_genres) = 705.030
-   data_source.py:23(read) = 157.840
+- **acumulated time**:
+- data_inserter.py:15(execute_insert) = 482.744
+- data_loader.py:12(etl_movies_genres) = 705.030
+- data_source.py:23(read) = 157.840
+
 4. **Enhancing Data Loading Efficiency:**
    To address the second most time-consuming aspect of reading data from files, we should consider implementing the following optimizations within the `DataSource` class:
 
