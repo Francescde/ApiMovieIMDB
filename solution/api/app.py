@@ -43,8 +43,8 @@ class MovieAPI:
         self.api.add_resource(MovieSingleResource, '/movies/<string:movie_id>')
         self.api.add_resource(DocResource, '/docs/openapi.yaml')
 
-    def start(self):
-        self.app.run(debug=True, host='0.0.0.0', port=5000)
+    def start(self, debug = True, host='0.0.0.0', port=5000):
+        self.app.run(debug=debug, host=host, port=port)
         return self.app
 
 

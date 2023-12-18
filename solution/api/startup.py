@@ -2,8 +2,7 @@ import json
 
 from app import MovieAPI
 
-def start(par1, par2):
-    print(par1, par2)
+def start():
     with open('config.json') as config_file:
         # Use the config data to construct the db_params dictionary
         config_data = json.load(config_file)
@@ -16,4 +15,5 @@ def start(par1, par2):
         }
         connectionString = 'postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}'.format(**db_params)
         movie_api = MovieAPI(connectionString)
-        movie_api.start()
+        return movie_api.start(debug=False)
+

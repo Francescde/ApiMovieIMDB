@@ -124,3 +124,20 @@ Details: [Data-loader Documentation](https://github.com/Francescde/ApiMovieIMDB/
 Flask app with RESTful API in the `api` directory. The `startup` module starts the API using Gunicorn.
 
 Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/main/solution/api)
+
+
+# Todo
+
+1. **Optimize Storage for IMDb Link:**
+   Consider storing IMDb IDs instead of full IMDb links to conserve database space. Storing IMDb links can be resource-intensive, and generating the link dynamically within the API when fetching the resource could be a more space-efficient approach. IMDb IDs can be extracted from the URL provided during the movie post request.
+
+2. **Utilize Production WSGI Server:**
+   Instead of relying on the Flask development server, transition to a production-ready WSGI server like Gunicorn. Production servers are better suited for handling concurrent requests and ensuring better performance and stability in a production environment.
+
+3. **Enhance API Integration Tests:**
+   Improve API integration tests by leveraging `pytest-docker` to instantiate a Dockerized PostgreSQL database. Testing on an environment that mirrors the actual API setup provides more accurate and realistic results compared to the current in-memory SQLLittle setup.
+
+# Curiosity
+
+- **Use of UUIDs for Security:**
+  Instead of utilizing the same IDs as those provided by the IMDb dataset, UUIDs have been adopted for security reasons. This practice enhances security by ensuring unpredictability in resource identifiers, minimizing the risk associated with exposing internal identifiers used in the IMDb dataset. The use of UUIDs adds an extra layer of confidentiality and data protection.
