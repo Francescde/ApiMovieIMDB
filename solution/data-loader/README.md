@@ -1,84 +1,115 @@
-The error "exec format error" typically indicates a compatibility issue between the binary and the operating system or architecture. In this case, it seems that the `dockerize` binary you downloaded may not be compatible with your system.
+# Data Loader for Movie API
 
-Here's an alternative approach that should work across different systems. Instead of using `curl` to download and install `dockerize`, you can use the multi-stage build approach:
+This component is responsible for loading the movie dataset into the PostgreSQL database used by the Movie API.
 
-```Dockerfile
-FROM python:3.8 as builder
+## Prerequisites
 
-WORKDIR /app
+Before running the data loader, ensure that you have the following:
 
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+- **Python:** The data loader is written in Python, so you need to have Python installed on your system.
+- **Dependencies:** Install the required Python dependencies by running:
+  ```bash
+  pip install -r requirements.txt
+  ```
+- **PostgreSQL Database:** Ensure that the PostgreSQL database is set up and configured with the appropriate credentials.
 
-# Download and extract dockerize in a different stage
-FROM alpine:latest as downloader
+## Configuration
 
-WORKDIR /app
+Configure the data loader by updating the `config.json` file with the necessary database connection details:
 
-RUN apk --no-cache add curl
-RUN curl -L -o dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-linux-amd64-v0.6.1.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize.tar.gz \
-    && rm dockerize.tar.gz
-
-# Final image
-FROM python:3.8
-
-WORKDIR /app
-
-COPY --from=builder /usr/local /usr/local
-
-COPY . /app
-
-# Run unit tests
-RUN python -m unittest discover tests
-
-ENTRYPOINT ["dockerize", "python", "-u", "load_data.py"]
+```json
+{
+  "DB_HOST": "your_postgres_host",
+  "DB_PORT": "your_postgres_port",
+  "DB_USER": "your_postgres_user",
+  "DB_PASSWORD": "your_postgres_password",
+  "DB_NAME": "your_postgres_database"
+}
 ```
 
-This Dockerfile uses a multi-stage build. In the first stage (`builder`), it installs the Python dependencies. In the second stage (`downloader`), it downloads and extracts `dockerize` using Alpine Linux, which is a lightweight base image. The final image then copies the necessary files from the builder stage and continues with the rest of the setup.
+## Usage
 
-This approach should help avoid compatibility issues.
+To run the data loader, execute the following command:
 
-----------------------------------------------------------------------------------------------------
-
-It appears that the error is related to the `dockerize` command not being found in the container's `$PATH`. This could be due to the fact that the `dockerize` binary is not present in the final image or is not located in a directory included in the `$PATH`.
-
-Let's modify the Dockerfile to ensure that `dockerize` is correctly included in the final image:
-
-```Dockerfile
-FROM python:3.8 as builder
-
-WORKDIR /app
-
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Download and extract dockerize in a different stage
-FROM alpine:latest as downloader
-
-WORKDIR /app
-
-RUN apk --no-cache add curl
-RUN curl -L -o dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-linux-amd64-v0.6.1.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize.tar.gz \
-    && rm dockerize.tar.gz
-
-# Final image
-FROM python:3.8
-
-WORKDIR /app
-
-COPY --from=builder /usr/local /usr/local
-COPY --from=downloader /usr/local/bin/dockerize /usr/local/bin/dockerize
-
-COPY . /app
-
-# Run unit tests
-RUN python -m unittest discover tests
-
-ENTRYPOINT ["dockerize", "python", "-u", "load_data.py"]
+```bash
+python data_loader.py
 ```
 
-This modification adds the line `COPY --from=downloader /usr/local/bin/dockerize /usr/local/bin/dockerize` to copy the `dockerize` binary from the `downloader` stage to the final image. This should resolve the "executable file not found" issue.
+This script will read the movie dataset and populate the PostgreSQL database with the relevant information.
 
-After making these changes, rebuild your Docker image and try running it again.
+## Running Battery Tests
+
+To ensure the robustness and reliability of the data loader, you can run battery tests. Execute the following command:
+
+```bash
+python -m unittest discover tests
+```
+
+This will run a suite of tests to validate the functionality of the data loader.
+
+
+### `data_loader.py`
+
+This module defines the `DataLoader` class, responsible for orchestrating the extraction, transformation, and loading (ETL) process of movie data into a PostgreSQL database.
+
+#### Class Methods:
+
+1. **`etl_movies_genres`**: Performs the ETL process for movie genres, including truncating relevant tables, inserting movies and genres data, and populating the `movie_genres` table.
+
+2. **`insert_movies_and_genres_rows_and_retrieve_relation`**: Inserts movie and genre data into the respective tables and returns the relationship data.
+
+3. **`insert_movies_data_and_get_movie_genres_data`**: Inserts movie data into the `movies` table and retrieves data required for the `movie_genres` table.
+
+4. **`truncate_tables`**: Truncates specified tables to ensure a clean slate for data loading.
+
+#### Usage Example:
+
+The `__main__` block demonstrates how to instantiate the `DataLoader` class, read configuration data from `config.json`, and perform the ETL process.
+
+### `utils.data_inserter.py`
+
+This module defines the `DataInserter` class, responsible for handling interactions with the PostgreSQL database.
+
+#### Class Methods:
+
+1. **`__init__`**: Initializes the class by creating a connection to the PostgreSQL database using provided parameters. Note that the commits aren't changed until the end of the transaction to ensure the rollback
+
+2. **`execute_insert`**: Executes a bulk insert operation for a given DataFrame into a specified table.
+
+3. **`close_connection`**: Commits changes to the database and closes the database connection.
+
+4. **`truncate_table`**: Truncates a specified table, restarting the identity column and cascading the truncation.
+
+5. **`rollback`**: Rolls back any uncommitted changes and closes the database connection.
+
+### `utils.data_source.py`
+
+This module defines the `DataSource` class, responsible for handling data sources, particularly downloading and extracting data.
+
+#### Class Methods:
+
+1. **`__init__`**: Initializes the class with the source URL and a flag indicating if the data is downloadable.
+
+2. **`download_and_extract`**: Downloads and extracts data from the specified source.
+
+3. **`download_df`**: Downloads and returns data as a Pandas DataFrame.
+
+4. **`read`**: Reads data either from the source directly or by downloading it, based on the `downloadable` flag.
+
+### `utils.data_transformer.py`
+
+This module defines the `DataTransformer` class, responsible for transforming raw movie data into a format suitable for database insertion.
+
+#### Class Methods:
+
+1. **`get_movies_data`**: Extracts and transforms movie data, including merging basics and ratings data, handling numeric conversions, and renaming columns.
+
+2. **`get_genres_data`**: Extracts and transforms genre data, including handling genres in the `genres_movie_data` DataFrame.
+
+3. **`get_movie_genres_data`**: Extracts and returns data for the `movie_genres` table.
+
+4. **`get_basics_data`**: Extracts and transforms basics data, including assigning IMDb links, generating unique IDs, handling null values, and optionally filling missing titles from the `akas_data_source`.
+
+5. **`assign_non_nulls_titles`**: Fills null titles in the DataFrame by querying the `akas_data_source`.
+
+These classes work together to provide a modular and organized approach to the ETL process for movie data in the IMDb dataset. The `DataLoader` orchestrates the process, utilizing the `DataInserter` for database interactions, the `DataSource` for handling data sources, and the `DataTransformer` for transforming raw data.
