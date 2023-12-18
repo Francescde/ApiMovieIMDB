@@ -219,7 +219,7 @@ During performance evaluation, specific bottlenecks were identified within the c
 - **data_loader.py:12 (etl_movies_genres)** = 705.030 seconds (main function)
   - *Description:* The total execution time for the main function `etl_movies_genres` within the `data_loader.py` module.
 
-These timings provide insights into potential areas for further optimization. Future efforts will be directed towards minimizing the execution times of these key components, exploring advanced indexing strategies, and enhancing parallel processing to achieve more efficient data insertion.
+These timings provide insights into potential areas for further optimization. Future efforts should be directed towards minimizing the execution times of these key components, exploring advanced indexing strategies, and enhancing parallel processing to achieve more efficient data insertion.
 
 ## 4. **Enhancing Data Loading Efficiency:**
    To address the second most time-consuming aspect of reading data from files, we should consider implementing the following optimizations within the `DataSource` class:
