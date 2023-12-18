@@ -75,6 +75,11 @@ Download relevant data files from [IMDB Datasets](https://datasets.imdbws.com/).
                     )
                 )).params(after_id=after_id)
             query = query.order_by(desc(getattr(Movie, sort_field)), Movie.id)
+         if not page_size or not page_size.isdigit():
+            page_size=10
+         # Retrieve and paginate the results taking genres in eager mode
+         movies = query.options(joinedload(Movie.genres)).limit(int(page_size)).all()  # Adjust the limit as needed
+
 
 ```
 ## Deadline
