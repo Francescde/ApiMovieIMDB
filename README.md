@@ -214,7 +214,7 @@ During performance evaluation, specific bottlenecks were identified within the c
   - *Description:* The execution time for the data insertion process within the `data_inserter.py` module.
 
 - **data_source.py:23 (read)** = 157.840 seconds
-  - *Description:* The time taken to read data from the data source in the `data_source.py` module.
+  - *Description:* The time taken to download-read data from the data source in the `data_source.py` module.
 
 - **data_loader.py:12 (etl_movies_genres)** = 705.030 seconds (main function)
   - *Description:* The total execution time for the main function `etl_movies_genres` within the `data_loader.py` module.
