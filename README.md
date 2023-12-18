@@ -53,6 +53,25 @@ Download relevant data files from [IMDB Datasets](https://datasets.imdbws.com/).
 
 Please respond within one week, by end of day, XXXXXXXXX.
 
+## Running the Project
+
+1. Ensure Docker and Docker Compose are installed.
+2. Clone the repository: `git clone <repository-url>`
+```bash
+git clone https://github.com/Francescde/ApiMovieIMDB.git
+```
+3. Navigate to the project directory: `cd ApiMovieIMDB`
+```bash
+cd ApiMovieIMDB
+```
+4. Run Docker Compose: `docker-compose up --build`
+```bash
+docker-compose up --build
+```
+
+Access the application at `http://localhost:5000` and the Swagger documentation at `http://localhost:5000/docs`.
+
+
 ## Docker
 
 This project uses Docker with two services, `postgres` and `solution`.
@@ -105,21 +124,3 @@ Details: [Data-loader Documentation](https://github.com/Francescde/ApiMovieIMDB/
 Flask app with RESTful API in the `api` directory. The `startup` module starts the API using Gunicorn.
 
 Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/main/solution/api)
-
-## Running the Project
-
-1. Ensure Docker and Docker Compose are installed.
-2. Clone the repository: `git clone <repository-url>`
-```bash
-git clone https://github.com/Francescde/ApiMovieIMDB.git
-```
-3. Navigate to the project directory: `cd ApiMovieIMDB`
-```bash
-cd ApiMovieIMDB
-```
-4. Run Docker Compose: `docker-compose up --build`
-```bash
-docker-compose up --build
-```
-
-Access the application at `http://localhost:5000` and the Swagger documentation at `http://localhost:5000/docs`.
