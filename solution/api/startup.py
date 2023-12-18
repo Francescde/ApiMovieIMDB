@@ -15,5 +15,5 @@ def start():
         }
         connectionString = 'postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}'.format(**db_params)
         movie_api = MovieAPI(connectionString)
-        return movie_api.start(debug=False)
+        return movie_api.app
 
