@@ -87,10 +87,8 @@ Download relevant data files from [IMDb Datasets](https://datasets.imdbws.com/).
    # Retrieve and paginate the results taking genres in eager mode
    movies = query.options(joinedload(Movie.genres)).limit(int(page_size)).all()  # Adjust the limit as needed
    ```
-
-## Deadline
-
-Please respond within one week, by the end of the day on XXXXXXXXX.
+- **Thinks left todo:**
+   Given the challenge's time limitations and the emphasis on showcasing problem-solving skills within those constraints, some aspects remain incomplete intentionally. The [TODO](https://github.com/Francescde/ApiMovieIMDB/tree/main?tab=readme-ov-file#todo) section provides insights into areas that would typically be addressed with more time. It's essential to note that this challenge was undertaken during personal free time, and while every effort has been made to approach it in a professional manner, certain aspects couldn't be fully addressed to the desired level.
 
 ## Running the Project
 
