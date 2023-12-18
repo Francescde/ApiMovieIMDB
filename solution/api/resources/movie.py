@@ -94,8 +94,6 @@ class MovieResource(Resource):
         new_movie = Movie(**data)
 
         db.session.add(new_movie)
-        # Serialize the movie with genres
-        db.session.commit()
 
         # Add genres to the new movie
         for genre_data in genres_data:
@@ -104,9 +102,8 @@ class MovieResource(Resource):
             if not genre:
                 genre = Genre(name=genre_data['name'])
                 db.session.add(genre)
-                db.session.commit()
             new_movie.genres.append(genre)
-            db.session.commit()
+        db.session.commit()
         serialized_movie = movies_schema.dump(new_movie)
         serialized_movie['genres'] = genres_data
 

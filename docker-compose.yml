@@ -11,7 +11,7 @@ services:
       - ./sql-scripts:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
-
+      
   solution:
     build:
       context: ./solution
@@ -20,12 +20,12 @@ services:
     ports:
       - "5000:5000"
     environment:
+      DEVELOP_SERVER: true
+      SKIP_LOAD_DATA: false
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: your_user
       DB_PASSWORD: your_password
-      DB_NAME: your_database # Add this environment variable to specify the host of the data-loader service
-      DEVELOP_SERVER: false
-      SKIP_LOAD_DATA: false
+      DB_NAME: your_database
 
 

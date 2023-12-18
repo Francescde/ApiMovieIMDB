@@ -165,11 +165,7 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
 
 # Todo
 
-1. **Post Movie Rollback:**
-   The endpoint to post a movie is committing multiple times before completing, so in case of an error, inconsistent data could be stored.
-# Todo
-
-2. **Remove Magic Values:**
+1. **Remove Magic Values:**
    Some values are hardcoded, such as the name of the columns in the data files and the port for the API. It's a good practice to make them configurable to facilitate easy replacement without modifying the code.
 
    - **Data Files Column Names:**
@@ -181,7 +177,7 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
    For example, consider using environment variables or a configuration file to store and retrieve these values dynamically.
 
 
-3. **Improve Logging:**
+2. **Improve Logging:**
    During the development process, logging was not initially prioritized. However, incorporating a robust logging system is crucial for understanding the application's behavior and diagnosing issues effectively. Logging into different levels allows for a more granular control over the information captured, providing insights into various aspects of the application.
 
    **Why Logging Matters:**
@@ -214,10 +210,10 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
    Introducing proper logging levels in your application enhances its maintainability, facilitates debugging, and contributes to a more efficient development and troubleshooting process.
 
 
-4. **Optimize Storage for IMDb Link:**
+3. **Optimize Storage for IMDb Link:**
    Consider storing IMDb IDs instead of full IMDb links to conserve database space. Storing IMDb links can be resource-intensive, and generating the link dynamically within the API when fetching the resource could be a more space-efficient approach. IMDb IDs can be extracted from the URL provided during the movie post request.
 
-5. **Reschedule Data Loading:**
+4. **Reschedule Data Loading:**
    According to the IMDb [Description](https://developer.imdb.com/non-commercial-datasets/), data is updated every day. As the data-loader is built in a way that each execution replaces the old data with the new one, scheduling a reload could be really useful.
 
    For example, to schedule a task to reload your Docker container every day at 2 am, you can use cron jobs. Here's how you can modify your Docker Compose file to include a cron service that triggers the reload:
@@ -289,7 +285,7 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
 
    With these changes, the `solution` container would be restarted daily at 2 am. The data-loader should also have a way to alert if an execution fails because then the data would be from the previous load thanks to the rollback policy.
 
-6. **Enhance API Integration Tests:**
+5. **Enhance API Integration Tests:**
    Improve API integration tests by leveraging `pytest-docker` to instantiate a Dockerized PostgreSQL database. Testing on an environment that mirrors the actual API setup provides more accurate and realistic results compared to the current in-memory SQLLittle setup.
 
 # Curiosity
