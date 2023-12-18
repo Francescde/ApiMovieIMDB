@@ -70,6 +70,8 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
                 query = query.filter(Movie.rating > float(value))
 
         # Apply sorting as there are fields with no unique values add a second field to ensure being deterministic
+        # Implement keyset pagination
+        # Use a subquery to get the value of the sorting field for the specified after_id
         descendent = query_params.get('desc')
         if not descendent or not int(descendent) == 1:
             if after_id:
@@ -82,8 +84,6 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
                     )
                 )).params(after_id=after_id)
             query = query.order_by(getattr(Movie, sort_field), Movie.id)
-            # Implement keyset pagination
-            # Use a subquery to get the value of the sorting field for the specified after_id
         else:
             if after_id:
                 subquery = Movie.query.filter(Movie.id == after_id).subquery()

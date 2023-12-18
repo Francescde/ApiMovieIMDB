@@ -39,7 +39,7 @@ Download relevant data files from [IMDB Datasets](https://datasets.imdbws.com/).
 - Inspiration: [IMDB Top 1000](https://www.imdb.com/search/title/?groups=top_1000&view=simple&sort=user_rating,desc).
 - Update requirements as necessary.
 
-- **Deliverables:**
+## Deliverables:
   - **Schema/Script for Generating Storage:**
     The data-loader documentation, available at [Data-loader Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/main/solution/data-loader), provides detailed information on the schema and script for generating storage. It outlines how the dataset is organized and loaded into the PostgreSQL database.
 
@@ -48,7 +48,35 @@ Download relevant data files from [IMDB Datasets](https://datasets.imdbws.com/).
 
   - **Pagination Technique Implementation:**
     Keyset pagination has been implemented for listing movies within the API. This choice was made due to the dataset's size, where offset pagination could be inefficient. Additionally, as the dataset lacks a clear distribution of values, and some ranges could be extensive, seek pagination was deemed less suitable for this particular use case. The implementation ensures efficient handling of large datasets while providing a stable and predictable performance.
+```python
+    
 
+        # Apply sorting as there are fields with no unique values add a second field to ensure being deterministic
+        descendent = query_params.get('desc')
+        if not descendent or not int(descendent) == 1:
+            if after_id:
+                subquery = Movie.query.filter(Movie.id == after_id).subquery()
+                query = query.filter(sqlalchemy.or_(
+                    getattr(Movie, sort_field) > subquery.c[sort_field],
+                    sqlalchemy.and_(
+                        getattr(Movie, sort_field) == subquery.c[sort_field],
+                        Movie.id < subquery.c.id
+                    )
+                )).params(after_id=after_id)
+            query = query.order_by(getattr(Movie, sort_field), Movie.id)
+        else:
+            if after_id:
+                subquery = Movie.query.filter(Movie.id == after_id).subquery()
+                query = query.filter(sqlalchemy.or_(
+                    getattr(Movie, sort_field) < subquery.c[sort_field],
+                    sqlalchemy.and_(
+                        getattr(Movie, sort_field) == subquery.c[sort_field],
+                        Movie.id < subquery.c.id
+                    )
+                )).params(after_id=after_id)
+            query = query.order_by(desc(getattr(Movie, sort_field)), Movie.id)
+
+```
 ## Deadline
 
 Please respond within one week, by end of day, XXXXXXXXX.
