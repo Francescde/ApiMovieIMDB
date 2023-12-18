@@ -166,7 +166,7 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
 
 # Todo
 
-1. **Improve Logging:**
+## 1. **Improve Logging:**
    During the development process, logging was not initially prioritized. However, incorporating a robust logging system is crucial for understanding the application's behavior and diagnosing issues effectively. Logging into different levels allows for a more granular control over the information captured, providing insights into various aspects of the application.
 
    **Why Logging Matters:**
@@ -198,22 +198,30 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
 
    Introducing proper logging levels in your application enhances its maintainability, facilitates debugging, and contributes to a more efficient development and troubleshooting process.
 
-2. **Remove Magic Values:**
+## 2. **Remove Magic Values:**
    Some values are hardcoded, such as the name of the columns in the data files and the host and port for the API. It's a good practice to make them configurable to facilitate easy replacement without modifying the code.
 
    For example, consider using environment variables or a configuration file to store and retrieve these values dynamically, just as it is done with the database configuration.
 
 
-3. **Optimizing Data Insertion:**
+## 3. **Optimizing Data Insertion:**
    Efficient data insertion remains the critical area for improvement in the data-loader process. While initial attempts have been made to experiment with indexing and parallel insertion using multithreading, there is still room for enhancement.
 
-- **acumulated time**:
-- data_inserter.py:15(execute_insert) = 482.744
-- data_source.py:23(read) = 157.840
+#### Accumulated Time Analysis:
+During performance evaluation, specific bottlenecks were identified within the codebase. The accumulated time for critical functions is as follows:
 
-- **data_loader.py:12(etl_movies_genres)** = 705.030 (main function)
+- **data_inserter.py:15 (execute_insert)** = 482.744 seconds
+  - *Description:* The execution time for the data insertion process within the `data_inserter.py` module.
 
-4. **Enhancing Data Loading Efficiency:**
+- **data_source.py:23 (read)** = 157.840 seconds
+  - *Description:* The time taken to read data from the data source in the `data_source.py` module.
+
+- **data_loader.py:12 (etl_movies_genres)** = 705.030 seconds (main function)
+  - *Description:* The total execution time for the main function `etl_movies_genres` within the `data_loader.py` module.
+
+These timings provide insights into potential areas for further optimization. Future efforts will be directed towards minimizing the execution times of these key components, exploring advanced indexing strategies, and enhancing parallel processing to achieve more efficient data insertion.
+
+## 4. **Enhancing Data Loading Efficiency:**
    To address the second most time-consuming aspect of reading data from files, we should consider implementing the following optimizations within the `DataSource` class:
 
 - **Optimize CSV Reading with `pandas.read_csv` Parameters:**
@@ -226,7 +234,7 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
    Explore the capabilities of Dask to introduce parallelization into the reading process. Dask is well-suited for handling larger-than-memory computations and can distribute the load across multiple cores, leading to faster data loading times.
 
 
-5. **Reschedule Data Loading:**
+## 5. **Reschedule Data Loading:**
    According to the IMDb [Description](https://developer.imdb.com/non-commercial-datasets/), data is updated every day. As the data-loader is built in a way that each execution replaces the old data with the new one, scheduling a reload could be really useful.
 
    For example, to schedule a task to reload your Docker container every day at 2 am, you can use cron jobs. Here's how you can modify your Docker Compose file to include a cron service that triggers the reload:
@@ -298,10 +306,10 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
 
    With these changes, the `solution` container would be restarted daily at 2 am. The data-loader should also have a way to alert if an execution fails because then the data would be from the previous load thanks to the rollback policy.
 
-6. **Enhance API Integration Tests:**
+## 6. **Enhance API Integration Tests:**
    Improve API integration tests by leveraging `pytest-docker` to instantiate a Dockerized PostgreSQL database. Testing on an environment that mirrors the actual API setup provides more accurate and realistic results compared to the current in-memory SQLLittle setup.
 
 # Curiosity
 
-- **Use of UUIDs for Security:**
+## - **Use of UUIDs for Security:**
   Instead of utilizing the same IDs as those provided by the IMDb dataset, UUIDs have been adopted for security reasons. This practice enhances security by ensuring unpredictability in resource identifiers, minimizing the risk associated with exposing internal identifiers used in the IMDb dataset. The use of UUIDs adds an extra layer of confidentiality and data protection.
