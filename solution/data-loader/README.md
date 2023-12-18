@@ -7,6 +7,18 @@ This component is responsible for loading the movie dataset into the PostgreSQL 
 Before running the data loader, ensure that you have the following:
 
 - **Python:** The data loader is written in Python, so you need to have Python installed on your system.
+- **Virtual Environment (Optional but recommended):** It's good practice to use a virtual environment to manage dependencies for your projects. You can create a virtual environment using the following commands:
+
+   ```bash
+   # Create a virtual environment
+   python -m venv venv
+
+   # Activate the virtual environment
+   # On Windows
+   venv\Scripts\activate
+   # On macOS/Linux
+   source venv/bin/activate
+   ```
 - **Dependencies:** Install the required Python dependencies by running:
   ```bash
   pip install -r requirements.txt
