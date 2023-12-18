@@ -167,10 +167,131 @@ Details: [API Documentation](https://github.com/Francescde/ApiMovieIMDB/tree/mai
 
 # Todo
 
-1. **Optimize Storage for IMDb Link:**
+1. **Post Movie Rollback:**
+   The endpoint to post a movie is committing multiple times before completing, so in case of an error, inconsistent data could be stored.
+# Todo
+
+2. **Remove Magic Values:**
+   Some values are hardcoded, such as the name of the columns in the data files and the port for the API. It's a good practice to make them configurable to facilitate easy replacement without modifying the code.
+
+   - **Data Files Column Names:**
+     The column names in the data files, which are currently hardcoded, should be made configurable. This ensures flexibility and ease of adaptation to different datasets without modifying the codebase.
+
+   - **API Port Configuration:**
+     The API port, currently hardcoded as 5000, should be made configurable. This allows for easy port customization without requiring changes to the source code.
+
+   For example, consider using environment variables or a configuration file to store and retrieve these values dynamically.
+
+
+3. **Improve Logging:**
+   During the development process, logging was not initially prioritized. However, incorporating a robust logging system is crucial for understanding the application's behavior and diagnosing issues effectively. Logging into different levels allows for a more granular control over the information captured, providing insights into various aspects of the application.
+
+   **Why Logging Matters:**
+   - **Debugging:** Detailed logs at the `DEBUG` level help developers trace the flow of the application, making it easier to identify and fix bugs during development.
+
+   - **Monitoring:** Information at the `INFO` level provides a high-level overview of the application's activities, aiding in monitoring its overall health and performance.
+
+   - **Warning and Error Handling:** The `WARNING` and `ERROR` levels are essential for capturing potential issues or unexpected behaviors, enabling proactive identification and resolution.
+
+   **How Log Levels Work in Python:**
+   Python's logging module supports different log levels, including `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`. Each level corresponds to a specific severity of the log message. During runtime, you can configure the logging system to capture messages at or above a certain level, allowing for dynamic adjustment of verbosity.
+
+   Example Configuration in Python:
+
+   ```python
+   import logging
+
+   logging.basicConfig(level=logging.DEBUG)  # Set the logging level to DEBUG for all loggers
+
+   # Example Usage
+   logging.debug("This is a debug message")
+   logging.info("This is an info message")
+   logging.warning("This is a warning message")
+   logging.error("This is an error message")
+   logging.critical("This is a critical message")
+   ```
+
+   By setting the logging level, you control which messages are recorded. For instance, if the level is set to `WARNING`, only messages with a severity of `WARNING`, `ERROR`, and `CRITICAL` will be captured.
+
+   Introducing proper logging levels in your application enhances its maintainability, facilitates debugging, and contributes to a more efficient development and troubleshooting process.
+
+
+4. **Optimize Storage for IMDb Link:**
    Consider storing IMDb IDs instead of full IMDb links to conserve database space. Storing IMDb links can be resource-intensive, and generating the link dynamically within the API when fetching the resource could be a more space-efficient approach. IMDb IDs can be extracted from the URL provided during the movie post request.
 
-2. **Enhance API Integration Tests:**
+5. **Reschedule Data Loading:**
+   According to the IMDb [Description](https://developer.imdb.com/non-commercial-datasets/), data is updated every day. As the data-loader is built in a way that each execution replaces the old data with the new one, scheduling a reload could be really useful.
+
+   For example, to schedule a task to reload your Docker container every day at 2 am, you can use cron jobs. Here's how you can modify your Docker Compose file to include a cron service that triggers the reload:
+
+   ```yaml
+   version: '3'
+
+   services:
+     postgres:
+       image: postgres:latest
+       environment:
+         POSTGRES_USER: your_user
+         POSTGRES_PASSWORD: your_password
+         POSTGRES_DB: your_database
+       volumes:
+         - ./sql-scripts:/docker-entrypoint-initdb.d
+       ports:
+         - "5432:5432"
+
+     solution:
+       build:
+         context: ./solution
+       depends_on:
+         - postgres
+       ports:
+         - "5000:5000"
+       environment:
+         DB_HOST: postgres
+         DB_PORT: 5432
+         DB_USER: your_user
+         DB_PASSWORD: your_password
+         DB_NAME: your_database
+         DEVELOP_SERVER: false
+         SKIP_LOAD_DATA: false
+
+     cron:
+       image: alpine
+       volumes:
+         - ./scripts:/scripts
+       depends_on:
+         - solution
+       command: ["sh", "-c", "crond -f -d 8"]
+   ```
+
+   Additionally, create a `scripts` folder in your project directory, and inside it, add a script named `reload.sh` with the following content:
+
+   ```sh
+   #!/bin/sh
+
+   # Reload the solution container
+   docker-compose restart solution
+   ```
+
+   Make sure to give execute permission to the script:
+
+   ```bash
+   chmod +x scripts/reload.sh
+   ```
+
+   This script will be executed by the cron job.
+
+   Finally, add a cron job configuration file named `crontab` in the `scripts` folder with the following content:
+
+   ```sh
+   0 2 * * * /scripts/reload.sh
+   ```
+
+   This cron job will run the `reload.sh` script every day at 2 am.
+
+   With these changes, the `solution` container would be restarted daily at 2 am. The data-loader should also have a way to alert if an execution fails because then the data would be from the previous load thanks to the rollback policy.
+
+6. **Enhance API Integration Tests:**
    Improve API integration tests by leveraging `pytest-docker` to instantiate a Dockerized PostgreSQL database. Testing on an environment that mirrors the actual API setup provides more accurate and realistic results compared to the current in-memory SQLLittle setup.
 
 # Curiosity
