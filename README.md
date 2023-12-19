@@ -233,6 +233,8 @@ These timings provide insights into potential areas for further optimization. Fu
 - **Utilize Dask for Parallel Reading:**
    Explore the capabilities of Dask to introduce parallelization into the reading process. Dask is well-suited for handling larger-than-memory computations and can distribute the load across multiple cores, leading to faster data loading times.
 
+Note that while optimizing data loading efficiency is a valuable goal, it's important to note that the data loading process currently represents only 22% of the total computation time (157.840 / 705.030). In contrast, data insertion accounts for a more significant portion, constituting 68% of the overall time (482.744 / 705.030). Hence, efforts to enhance efficiency will primarily focus on optimizing the data insertion process to achieve substantial improvements in performance.
+
 
 ## 5. **Reschedule Data Loading:**
    According to the IMDb [Description](https://developer.imdb.com/non-commercial-datasets/), data is updated every day. As the data-loader is built in a way that each execution replaces the old data with the new one, scheduling a reload could be really useful.
