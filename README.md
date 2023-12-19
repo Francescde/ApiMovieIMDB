@@ -221,7 +221,7 @@ During performance evaluation, specific bottlenecks were identified within the c
 
 These timings provide insights into potential areas for further optimization. Future efforts should be directed towards minimizing the execution times of these key components, exploring advanced indexing strategies, and enhancing parallel processing to achieve more efficient data insertion.
 
-Note that considerable performance gains can be achieved by migrating from a PostgreSQL relational database to a non-SQL MongoDB solution for the data insertion process.
+**Note:** Considerable performance gains can be achieved by migrating from a PostgreSQL relational database to a non-SQL MongoDB solution for the data insertion process. The flexibility and scalability offered by MongoDB, especially in handling diverse data structures, make it a promising alternative for optimizing the data-loading pipeline.
 
 ## 4. **Enhancing Data Loading Efficiency:**
    To address the second most time-consuming aspect of reading data from files, we should consider implementing the following optimizations within the `DataSource` class:
@@ -235,7 +235,7 @@ Note that considerable performance gains can be achieved by migrating from a Pos
 - **Utilize Dask for Parallel Reading:**
    Explore the capabilities of Dask to introduce parallelization into the reading process. Dask is well-suited for handling larger-than-memory computations and can distribute the load across multiple cores, leading to faster data loading times.
 
-Note that while optimizing data loading efficiency is a valuable goal, it's important to note that the data loading process currently represents only 22% of the total computation time (157.840 / 705.030). In contrast, data insertion accounts for a more significant portion, constituting 68% of the overall time (482.744 / 705.030). Hence, efforts to enhance efficiency will primarily focus on optimizing the data insertion process to achieve substantial improvements in performance.
+**Note:** While optimizing data loading efficiency is a valuable goal, it's important to note that the data loading process currently represents only 22% of the total computation time (157.840 / 705.030). In contrast, data insertion accounts for a more significant portion, constituting 68% of the overall time (482.744 / 705.030). Hence, efforts to enhance efficiency will primarily focus on optimizing the data insertion process to achieve substantial improvements in performance.
 
 
 ## 5. **Reschedule Data Loading:**
