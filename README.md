@@ -221,7 +221,7 @@ During performance evaluation, specific bottlenecks were identified within the c
 
 These timings provide insights into potential areas for further optimization. Future efforts should be directed towards minimizing the execution times of these key components, exploring advanced indexing strategies, and enhancing parallel processing to achieve more efficient data insertion.
 
-**Note:** Considerable performance gains can be achieved by migrating from a PostgreSQL relational database to a non-SQL MongoDB solution for the data insertion process. The flexibility and scalability offered by MongoDB, especially in handling diverse data structures, make it a promising alternative for optimizing the data-loading pipeline.
+**Note:** Considerable performance gains can be achieved by migrating from a PostgreSQL relational database to a non-SQL MongoDB solution for the data insertion process. While PostgreSQL offers robust features and reliability,the flexibility and scalability offered by MongoDB, especially in handling diverse data structures, make it a promising alternative for optimizing the data-loading proces.
 
 ## 4. **Enhancing Data Loading Efficiency:**
    To address the second most time-consuming aspect of reading data from files, we should consider implementing the following optimizations within the `DataSource` class:
