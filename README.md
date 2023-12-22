@@ -58,33 +58,31 @@ Download relevant data files from [IMDb Datasets](https://datasets.imdbws.com/).
 - **Pagination Technique Implementation:**
    Keyset pagination has been implemented for listing movies within the API. This choice was made due to the dataset's size, where offset pagination could be inefficient. Additionally, as the dataset lacks a clear distribution of values, and some ranges could be extensive, seek pagination was deemed less suitable for this particular use case. The implementation ensures efficient handling of large datasets while providing stable and predictable performance.
    ```python
-   # Apply sorting as there are fields with no unique values; add a second field to ensure being deterministic
-   if not 'desc' in query_params:
-       if after_id:
-           subquery = Movie.query.filter(Movie.id == after_id).subquery()
-           query = query.filter(sqlalchemy.or_(
-               getattr(Movie, sort_field) > subquery.c[sort_field],
-               sqlalchemy.and_(
-                   getattr(Movie, sort_field) == subquery.c[sort_field],
-                   Movie.id < subquery.c.id
-               )
-           )).params(after_id=after_id)
-       query = query.order_by(getattr(Movie, sort_field), Movie.id)
-   else:
-       if after_id:
-           subquery = Movie.query.filter(Movie.id == after_id).subquery()
-           query = query.filter(sqlalchemy.or_(
-               getattr(Movie, sort_field) < subquery.c[sort_field],
-               sqlalchemy.and_(
-                   getattr(Movie, sort_field) == subquery.c[sort_field],
-                   Movie.id < subquery.c.id
-               )
-           )).params(after_id=after_id)
-       query = query.order_by(desc(getattr(Movie, sort_field)), Movie.id)
-   if not page_size or not page_size.isdigit():
-       page_size=10
-   # Retrieve and paginate the results taking genres in eager mode
-   movies = query.options(joinedload(Movie.genres)).limit(int(page_size)).all()  # Adjust the limit as needed
+         if after_id:
+            subquery = Movie.query.filter(Movie.id == after_id).subquery()
+            if 'desc' not in query_params.keys():
+                query = query.filter(sqlalchemy.or_(
+                    getattr(Movie, sort_field) > subquery.c[sort_field],
+                    sqlalchemy.and_(
+                        getattr(Movie, sort_field) == subquery.c[sort_field],
+                        Movie.id < subquery.c.id
+                    )
+                )).params(after_id=after_id)
+            else:
+                query = query.filter(sqlalchemy.or_(
+                    getattr(Movie, sort_field) < subquery.c[sort_field],
+                    sqlalchemy.and_(
+                        getattr(Movie, sort_field) == subquery.c[sort_field],
+                        Movie.id < subquery.c.id
+                    )
+                )).params(after_id=after_id)
+         sort_attribute = getattr(Movie, sort_field)
+         if 'desc' in query_params.keys():
+            sort_attribute = desc(getattr(Movie, sort_field))
+         query = query.order_by(sort_attribute, Movie.id)
+         # Retrieve and paginate the results taking genres in eager mode
+         movies = query.options(joinedload(Movie.genres)).limit(int(page_size)).all()  # Adjust the limit as needed
+
    ```
 - **Thinks left todo:**
    Given the challenge's time limitations and the emphasis on showcasing problem-solving skills within those constraints, some aspects remain incomplete intentionally. The [TODO](https://github.com/Francescde/ApiMovieIMDB/tree/main?tab=readme-ov-file#todo) section provides insights into areas that would typically be addressed with more time. It's essential to note that this challenge was undertaken during personal free time, and while every effort has been made to approach it in a professional manner, certain aspects couldn't be fully addressed to the desired level.

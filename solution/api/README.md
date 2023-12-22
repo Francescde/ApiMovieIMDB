@@ -16,7 +16,7 @@ Get a list of movies with options for sorting, filtering, and pagination.
 #### Parameters:
 
 - **sort**: Field to sort the movies by (title, year, rating). Default is title.
-- **desc**: If desc=1, the sorting order will be in descending order.
+- **desc**: If desc is defined, the sorting order will be in descending order.
 - **genre**: Filter movies by category/genre.
 - **rating_gt**: Filter movies with a rating greater than the specified value.
 - **after_id**: Get movies after the specified movie ID (for keyset pagination).
@@ -36,6 +36,7 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
 #### Code:
 
 ```python
+    
     def get(self):
         movies_schema = MovieSchema(many=True)
         '''List all movies with sorting, filtering, and keyset pagination'''
@@ -47,6 +48,11 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
         if sort_field not in valid_sort_fields:
             return {'message': 'Invalid sort field'}, 400
 
+
+        page_size = query_params.get('page_size', '10')
+        if not page_size.isdigit():
+            return {'message': 'page size value is invalid'}, 400
+
         # Extract and validate filtering parameters
         filter_params = {}
         valid_filter_fields = ['genre', 'rating_gt']
@@ -54,11 +60,8 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
             if key in valid_filter_fields:
                 filter_params[key] = value
 
-        # Extract and validate keyset pagination parameters
-        valid_pagination_fields = ['id', 'title', 'year', 'rating']
+        # Extract after id
         after_id = query_params.get('after_id')
-        if after_id and sort_field not in valid_pagination_fields:
-            return {'message': 'Invalid pagination field for keyset pagination'}, 400
 
         # Build the query based on sorting and filtering parameters
         query = Movie.query
@@ -72,9 +75,10 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
         # Apply sorting as there are fields with no unique values add a second field to ensure being deterministic
         # Implement keyset pagination
         # Use a subquery to get the value of the sorting field for the specified after_id
-        if 'desc' not in query_params.keys():
-            if after_id:
-                subquery = Movie.query.filter(Movie.id == after_id).subquery()
+
+        if after_id:
+            subquery = Movie.query.filter(Movie.id == after_id).subquery()
+            if 'desc' not in query_params.keys():
                 query = query.filter(sqlalchemy.or_(
                     getattr(Movie, sort_field) > subquery.c[sort_field],
                     sqlalchemy.and_(
@@ -82,10 +86,7 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
                         Movie.id < subquery.c.id
                     )
                 )).params(after_id=after_id)
-            query = query.order_by(getattr(Movie, sort_field), Movie.id)
-        else:
-            if after_id:
-                subquery = Movie.query.filter(Movie.id == after_id).subquery()
+            else:
                 query = query.filter(sqlalchemy.or_(
                     getattr(Movie, sort_field) < subquery.c[sort_field],
                     sqlalchemy.and_(
@@ -93,10 +94,10 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
                         Movie.id < subquery.c.id
                     )
                 )).params(after_id=after_id)
-            query = query.order_by(desc(getattr(Movie, sort_field)), Movie.id)
-        page_size = query_params.get('page_size')
-        if not page_size or not page_size.isdigit():
-            page_size=10
+        sort_attribute = getattr(Movie, sort_field)
+        if 'desc' in query_params.keys():
+            sort_attribute = desc(getattr(Movie, sort_field))
+        query = query.order_by(sort_attribute, Movie.id)
         # Retrieve and paginate the results taking genres in eager mode
         movies = query.options(joinedload(Movie.genres)).limit(int(page_size)).all()  # Adjust the limit as needed
 
@@ -104,7 +105,9 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
         # genres aren't serializing as they should. this is a workaround
         for serialized_movie, movie in zip(serialized_movies, movies):
             custom_serialize(movie, serialized_movie)
+        
         return serialized_movies
+
 ```
 
 

@@ -14,7 +14,7 @@ paths:
             type: string
         - name: desc
           in: query
-          description: If desc=1 will sort the sort attribute in the opposite way
+          description: If desc is defined will sort the sort attribute in the opposite way
           schema:
             type: string
         - name: genre
