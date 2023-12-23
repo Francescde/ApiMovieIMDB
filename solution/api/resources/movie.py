@@ -53,7 +53,7 @@ class MovieResource(Resource):
                     getattr(Movie, sort_field) > subquery.c[sort_field],
                     sqlalchemy.and_(
                         getattr(Movie, sort_field) == subquery.c[sort_field],
-                        Movie.id < subquery.c.id
+                        Movie.id > subquery.c.id
                     )
                 )).params(after_id=after_id)
             query = query.order_by(getattr(Movie, sort_field), Movie.id)
@@ -64,7 +64,7 @@ class MovieResource(Resource):
                     getattr(Movie, sort_field) < subquery.c[sort_field],
                     sqlalchemy.and_(
                         getattr(Movie, sort_field) == subquery.c[sort_field],
-                        Movie.id < subquery.c.id
+                        Movie.id > subquery.c.id
                     )
                 )).params(after_id=after_id)
             query = query.order_by(desc(getattr(Movie, sort_field)), Movie.id)
