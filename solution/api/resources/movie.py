@@ -59,7 +59,7 @@ class MovieResource(Resource):
                 pagination_filter,
                 sqlalchemy.and_(
                     getattr(Movie, sort_field) == subquery.c[sort_field],
-                    Movie.id < subquery.c.id
+                    Movie.id > subquery.c.id
                 )
             )).params(after_id=after_id)
 

@@ -218,6 +218,14 @@ class TestMovieListResource(TestCase):
         movie2.genres.append(genre)
         db.session.add(movie2)
 
+        movie3 = Movie(id='3', title='Movie 3', year=2019, rating=8.0, runtime=110)
+        movie3.genres.append(genre)
+        db.session.add(movie3)
+
+        movie4 = Movie(id='4', title='Movie 4', year=2021, rating=8.0, runtime=120)
+        movie4.genres.append(genre)
+        db.session.add(movie4)
+
         db.session.commit()
 
         # Act
@@ -227,10 +235,53 @@ class TestMovieListResource(TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         data = response.json
-        self.assertEqual(len(data), 2)
+        self.assertEqual(len(data), 4)
         # Since the rating is the same, the sorting should be based on the 'id'
-        self.assertEqual(data[0]['title'], 'Movie 2')
-        self.assertEqual(data[1]['title'], 'Movie 1')
+        self.assertEqual(data[0]['title'], 'Movie 4')
+        self.assertEqual(data[1]['title'], 'Movie 2')
+        self.assertEqual(data[2]['title'], 'Movie 1')
+        self.assertEqual(data[3]['title'], 'Movie 3')
+        self.assertEqual(data[0]['id'], '4')
+        self.assertEqual(data[1]['id'], '1')
+        self.assertEqual(data[2]['id'], '2')
+        self.assertEqual(data[3]['id'], '3')
+
+    def test_get_movies_desc_with_same_year_value_next_page(self):
+        # Arrange
+        genre = Genre(name='Action')
+        db.session.add(genre)
+        db.session.commit()
+
+        # Creating movies with the same rating
+        movie1 = Movie(id='2', title='Movie 1', year=2020, rating=8.0, runtime=110)
+        movie1.genres.append(genre)
+        db.session.add(movie1)
+
+        movie2 = Movie(id='1', title='Movie 2', year=2020, rating=8.0, runtime=120)
+        movie2.genres.append(genre)
+        db.session.add(movie2)
+
+        movie3 = Movie(id='3', title='Movie 3', year=2019, rating=8.0, runtime=110)
+        movie3.genres.append(genre)
+        db.session.add(movie3)
+
+        movie4 = Movie(id='4', title='Movie 4', year=2021, rating=8.0, runtime=120)
+        movie4.genres.append(genre)
+        db.session.add(movie4)
+
+        db.session.commit()
+
+        # Act
+        client = self.app.test_client()
+        response = client.get('/movies?sort=year&desc&after_id=1')
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        data = response.json
+        self.assertEqual(len(data), 2)
+
+        self.assertEqual(data[0]['title'], 'Movie 1')
+        self.assertEqual(data[1]['title'], 'Movie 3')
 
 if __name__ == '__main__':
     unittest.main()
