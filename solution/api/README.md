@@ -78,22 +78,18 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
 
         if after_id:
             subquery = Movie.query.filter(Movie.id == after_id).subquery()
-            if 'desc' not in query_params.keys():
-                query = query.filter(sqlalchemy.or_(
-                    getattr(Movie, sort_field) > subquery.c[sort_field],
-                    sqlalchemy.and_(
-                        getattr(Movie, sort_field) == subquery.c[sort_field],
-                        Movie.id > subquery.c.id
-                    )
-                )).params(after_id=after_id)
-            else:
-                query = query.filter(sqlalchemy.or_(
-                    getattr(Movie, sort_field) < subquery.c[sort_field],
-                    sqlalchemy.and_(
-                        getattr(Movie, sort_field) == subquery.c[sort_field],
-                        Movie.id > subquery.c.id
-                    )
-                )).params(after_id=after_id)
+            pagination_filter = getattr(Movie, sort_field) > subquery.c[sort_field]
+            if 'desc' in query_params.keys():
+                pagination_filter = getattr(Movie, sort_field) < subquery.c[sort_field]
+
+            query = query.filter(sqlalchemy.or_(
+                pagination_filter,
+                sqlalchemy.and_(
+                    getattr(Movie, sort_field) == subquery.c[sort_field],
+                    Movie.id > subquery.c.id
+                )
+            )).params(after_id=after_id)
+
         sort_attribute = getattr(Movie, sort_field)
         if 'desc' in query_params.keys():
             sort_attribute = desc(getattr(Movie, sort_field))
@@ -102,6 +98,7 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
         movies = query.options(joinedload(Movie.genres)).limit(int(page_size)).all()  # Adjust the limit as needed
 
         serialized_movies = movies_schema.dump(movies)
+
         # genres aren't serializing as they should. this is a workaround
         for serialized_movie, movie in zip(serialized_movies, movies):
             custom_serialize(movie, serialized_movie)
