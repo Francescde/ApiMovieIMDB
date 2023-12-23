@@ -12,7 +12,7 @@ class MovieResource(Resource):
 
     def get(self):
         movies_schema = MovieSchema(many=True)
-        '''List all movies with sorting, filtering, and keyset pagination'''
+        # List all movies with sorting, filtering, and keyset pagination
         query_params = request.args.to_dict()
 
         # Extract and validate sorting parameters
