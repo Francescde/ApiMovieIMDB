@@ -83,7 +83,7 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
                     getattr(Movie, sort_field) > subquery.c[sort_field],
                     sqlalchemy.and_(
                         getattr(Movie, sort_field) == subquery.c[sort_field],
-                        Movie.id < subquery.c.id
+                        Movie.id > subquery.c.id
                     )
                 )).params(after_id=after_id)
             else:
@@ -91,7 +91,7 @@ GET /movies?sort=rating&desc=1&genre=action&rating_gt=8.0&page_size=20
                     getattr(Movie, sort_field) < subquery.c[sort_field],
                     sqlalchemy.and_(
                         getattr(Movie, sort_field) == subquery.c[sort_field],
-                        Movie.id < subquery.c.id
+                        Movie.id > subquery.c.id
                     )
                 )).params(after_id=after_id)
         sort_attribute = getattr(Movie, sort_field)
